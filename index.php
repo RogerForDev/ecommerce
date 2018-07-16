@@ -228,16 +228,6 @@ $app->get('/admin/categories/:idcategory', function($idcategory){
 	$page->setTpl("categories-update", ["category"=>$category->getValues()]);
 });
 
-$app->post('/admin/categories/:idcategory', function($idcategory){
-	$page = new PageAdmin();
-
-	$category = new Category();
-
-	$category->get((int)$idcategory);
-
-	$page->setTpl("categories-update", ["category"=>$category->getValues()]);
-});
-
 $app->post('/admin/categories/create', function(){
 
 	$category = new Category();
@@ -251,6 +241,16 @@ $app->post('/admin/categories/create', function(){
 
 });
 
+$app->post('/admin/categories/:idcategory', function($idcategory){
+	$page = new PageAdmin();
+
+	$category = new Category();
+
+	$category->get((int)$idcategory);
+
+	$page->setTpl("categories-update", ["category"=>$category->getValues()]);
+});
+
 $app->get("/admin/categories/:idcategory/delete", function($idcategory){
 
 	$category = new Category();
@@ -261,6 +261,21 @@ $app->get("/admin/categories/:idcategory/delete", function($idcategory){
 
 	header("Location: /admin/categories");
 	exit;
+
+});
+
+$app->get('/categories/:idcategory', function($idcategory){
+
+	$category = new Category();
+
+	$category->get((int)$idcategory);
+
+	$page = new Page();
+
+	$page->setTpl("category", [
+		'category'=>$category->getValues(),
+		'products'=>[]
+	]);
 
 });
 $app->run();
