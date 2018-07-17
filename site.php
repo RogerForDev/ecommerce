@@ -26,8 +26,9 @@ $app->get('/categories/:idcategory', function($idcategory){
 
 	$page->setTpl("category", [
 		'category'=>$category->getValues(),
-		'products'=>[]
+		'produtos'=>Product::checkList($category->getProducts())
 	]);
 
 });
+
 ?>
