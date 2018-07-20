@@ -38,8 +38,6 @@ class Cart extends Model {
 
                 $cart->save();
 
-
-
                 $cart->setToSession();
                
             }
@@ -107,7 +105,6 @@ class Cart extends Model {
         $sql->query("DELETE FROM tb_cart WHERE idcart = :idcart", array(
             ":idcart"=>$this->getidcart()
         ));
-        Cart::updateFile();
     }
 
     public static function updateFile(){
@@ -122,34 +119,20 @@ class Cart extends Model {
         file_put_contents($_SERVER['DOCUMENT_ROOT']. DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR . "cart-menu.html", implode('', $html));
     }
 
-    public function getProducts($relaled = true)
+    public function getProducts()
     {
         $sql = new Sql();
-        if($relaled === true){
-            return $sql->select("
-            SELECT * FROM tb_products WHERE idproduct IN(
-                SELECT a.idproduct
-                FROM tb_products a 
-                INNER JOIN tb_productscart b 
-                USING(idproduct)
-                WHERE b.idcart = :idcart
-            );
-            ",[
-                ":idcart"=>$this->getidcart()
-            ]);
-        }else{
-            return $sql->select("
-            SELECT * FROM tb_products WHERE idproduct NOT IN(
-                SELECT a.idproduct
-                FROM tb_products a 
-                INNER JOIN tb_productscart b 
-                USING(idproduct)
-                WHERE b.idcart = :idcart
-            );
-            ",[
-                ":idcart"=>$this->getidcart()
-            ]);
-        }
+
+        return Product::checkList($sql->select("            
+            SELECT b.idproduct, b.desproduct, b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl, COUNT(*) as nrqtd, SUM(b.vlprice) as vltotal
+            FROM tb_cartsproducts a 
+            INNER JOIN tb_products b USING(idproduct)
+            WHERE a.idcart = :idcart AND a.dtremoved IS NULL
+            GROUP BY b.idproduct, b.desproduct, b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl
+            ORDER BY b.desproduct     
+        ",[
+            ":idcart"=>$this->getidcart()
+        ]));
     }
 
     public function getProductsPage($page = 1, $itensPerPage = 3)
@@ -182,19 +165,26 @@ class Cart extends Model {
     {
         $sql = new Sql();
 
-        $sql->query("INSERT INTO `tb_productscart`(`idcart`,`idproduct`) VALUES(:idcart,:idproduct)", [
+        $sql->query("INSERT INTO `tb_cartsproducts`(`idcart`,`idproduct`) VALUES(:idcart,:idproduct)", [
             ":idcart"=>$this->getidcart(),
             ":idproduct"=>$product->getidproduct()
         ]);
     }
-    public function removeProduct(Product $product)
+    public function removeProduct(Product $product, $all = false)
     {
         $sql = new Sql();
 
-        $sql->query("DELETE FROM tb_productscart WHERE idcart = :idcart AND idproduct = :idproduct", [
-            ":idcart"=>$this->getidcart(),
-            ":idproduct"=>$product->getidproduct()
-        ]);
+        if($all){
+            $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW() WHERE idcart = :idcart AND idproduct = :idproduct AND dtremoved IS NULL", [
+                ":idcart"=>$this->getidcart(),
+                ":idproduct"=>$product->getidproduct()
+            ]);
+        }else{            
+            $sql->query("UPDATE tb_cartsproducts SET dtremoved = NOW() WHERE idcart = :idcart AND idproduct = :idproduct AND dtremoved IS NULL LIMIT 1", [
+                ":idcart"=>$this->getidcart(),
+                ":idproduct"=>$product->getidproduct()
+            ]);
+        }
     }
 
 }
