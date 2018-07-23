@@ -51,14 +51,11 @@
                 </form>                    
             </div>
             <div class="col-md-6">
-                <?php if( $error != '' ){ ?>
-
+                
                 <div class="alert alert-danger">
-                    <?php echo htmlspecialchars( $error, ENT_COMPAT, 'UTF-8', FALSE ); ?>
-
+                    error
                 </div>
-                <?php } ?>
-
+                
                 <form id="register-form-wrap" action="/register" class="register" method="post">
                     <h2>Criar conta</h2>
                     <p class="form-row form-row-first">
