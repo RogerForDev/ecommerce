@@ -10,6 +10,7 @@ class User extends Model {
 
     const SESSION = "User";
     const ERROR = 'UserError';
+    const ERROR_REGISTER = 'ErrorRegister';
     const SECRET = "HcodePhp7_Secret";
 
     public static function getFromSession()
@@ -253,6 +254,37 @@ class User extends Model {
             'cost'=>12
         ]);
     }
+    public function setErrorRegister($msg)
+    {
+        $_SESSION[User::ERROR_REGISTER] = $msg;
+    }
+
+    public static function getErrorRegister()
+    {
+        $msg = (isset($_SESSION[User::ERROR_REGISTER]) && $_SESSION[User::ERROR_REGISTER]) ? $_SESSION[User::ERROR_REGISTER] : "";
+        
+        User::clearMsgErrorRegister();
+
+        return $msg;
+    
+    }
+
+    public static function clearMsgErrorRegister()
+    {
+        $_SESSION[User::ERROR_REGISTER] = NULL;
+    }
+
+    public function checkLoginExist($login)
+    {
+        $sql = new Sql();
+
+        $results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :deslogin", [
+            'deslogin'=>$login
+        ]);
+
+        return (count($results) > 0);
+    }
+
 
 }
 
