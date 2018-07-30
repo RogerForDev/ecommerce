@@ -10,6 +10,7 @@ class User extends Model {
 
     const SESSION = "User";
     const ERROR = 'UserError';
+    const SUCCESS = 'UserSuccess';
     const ERROR_REGISTER = 'ErrorRegister';
     const SECRET = "HcodePhp7_Secret";
 
@@ -251,6 +252,26 @@ class User extends Model {
         $_SESSION[User::ERROR] = null;
     }
 
+    public static function setSuccess($msg)
+    {
+        $_SESSION[User::SUCCESS] = $msg;
+    }
+
+    public static function getSuccess()
+    {
+        $msg = (isset($_SESSION[User::SUCCESS]) && $_SESSION[User::SUCCESS]) ? $_SESSION[User::SUCCESS] : "";
+        
+        User::clearSuccess();
+
+        return $msg;
+    
+    }
+
+    public static function clearSuccess()
+    {
+        $_SESSION[User::SUCCESS] = null;
+    }
+
     public static function getPasswordHash($password)
     {
         return password_hash($password, PASSWORD_DEFAULT, [
@@ -287,6 +308,8 @@ class User extends Model {
 
         return (count($results) > 0);
     }
+
+
 
 
 }
